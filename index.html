@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AR Capital — Arturo Rios Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020508;--surface:#050d18;--card:rgba(5,16,35,0.9);
+  --border:rgba(0,210,255,0.1);--accent:#00d2ff;--green:#00ffb3;
+  --gold:#f0c040;--red:#ff4560;--text:#dff0ff;--muted:#4a6a88;
+  --glow-a:0 0 40px rgba(0,210,255,0.2);--glow-g:0 0 40px rgba(0,255,179,0.2);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;line-height:1.6;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,210,255,0.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,210,255,0.025) 1px,transparent 1px);
+  background-size:50px 50px;}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+section,header,nav,footer,aside{position:relative;z-index:1;}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  padding:10px clamp(14px,5vw,60px);
+  background:rgba(2,5,8,0.92);backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--border);
+}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-avatar{
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid var(--accent);overflow:hidden;flex-shrink:0;
+  box-shadow:0 0 12px rgba(0,210,255,0.35);
+  background:var(--surface);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+}
+.nav-avatar img{width:100%;height:100%;object-fit:cover;}
+.av-initials{font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:var(--accent);letter-spacing:1px;}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1;}
+.nav-logo-main{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.1rem,2.5vw,1.35rem);letter-spacing:4px;color:var(--accent);text-shadow:var(--glow-a);}
+.nav-logo-sub{font-size:clamp(0.48rem,1vw,0.55rem);letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.nav-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.nav-live{display:flex;align-items:center;gap:6px;font-size:clamp(0.52rem,1.2vw,0.6rem);letter-spacing:2px;color:var(--green);text-transform:uppercase;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:livePulse 1.4s infinite;flex-shrink:0;}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,179,0.5);}50%{box-shadow:0 0 0 6px rgba(0,255,179,0);}}
+.nav-btn{
+  padding:8px 18px;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  color:#000;font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(0.68rem,1.4vw,0.8rem);letter-spacing:3px;
+  border:none;cursor:pointer;transition:opacity .2s,transform .15s;white-space:nowrap;
+  text-decoration:none;display:inline-flex;align-items:center;
+}
+.nav-btn:hover{opacity:.85;transform:translateY(-1px);}
+
+/* ═══ ASIDE NAV INDICATOR ═══ */
+#page-nav{
+  position:fixed;right:clamp(8px,2vw,22px);top:50%;transform:translateY(-50%);
+  z-index:200;display:flex;flex-direction:column;gap:10px;align-items:flex-end;
+}
+.pn-item{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  text-decoration:none;
+}
+.pn-dot{
+  width:8px;height:8px;border-radius:50%;
+  border:1.5px solid var(--muted);background:transparent;
+  transition:all .3s;flex-shrink:0;
+}
+.pn-label{
+  font-size:0.58rem;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--muted);opacity:0;transform:translateX(8px);
+  transition:opacity .3s,transform .3s,color .3s;
+  white-space:nowrap;pointer-events:none;
+}
+.pn-item:hover .pn-label,.pn-item.active .pn-label{opacity:1;transform:translateX(0);}
+.pn-item:hover .pn-dot{border-color:var(--accent);}
+.pn-item.active .pn-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(0,210,255,0.5);}
+.pn-item.active .pn-label{color:var(--accent);}
+@media(max-width:600px){#page-nav{display:none;}}
+
+/* ═══ HERO ═══ */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(100px,14vw,140px) clamp(14px,6vw,80px) clamp(50px,7vw,90px);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:clamp(0.52rem,1.4vw,0.68rem);letter-spacing:4px;text-transform:uppercase;
+  color:var(--accent);border:1px solid rgba(0,210,255,0.2);
+  padding:7px 18px;border-radius:100px;margin-bottom:26px;
+  opacity:0;animation:fadeUp .7s .2s forwards;
+}
+.hero-name{font-size:clamp(0.65rem,1.8vw,0.82rem);letter-spacing:6px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;opacity:0;animation:fadeUp .7s .3s forwards;}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.2rem,10vw,9rem);line-height:.92;letter-spacing:3px;color:#fff;
+  opacity:0;animation:fadeUp .8s .4s forwards;
+}
+.t-accent{color:var(--accent);}.t-green{color:var(--green);}
+.hero-sub{
+  max-width:560px;margin:22px auto 0;
+  font-size:clamp(0.8rem,1.9vw,0.94rem);line-height:1.9;color:var(--muted);
+  opacity:0;animation:fadeUp .8s .55s forwards;
+}
+.hero-sub strong{color:var(--text);}
+.hero-btns{
+  display:flex;gap:12px;justify-content:center;margin-top:34px;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .8s .7s forwards;
+}
+.btn-p{
+  padding:clamp(11px,2vw,15px) clamp(20px,4vw,40px);
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  color:#000;font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(0.8rem,1.9vw,1rem);letter-spacing:4px;
+  border:none;border-radius:4px;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(0,210,255,0.3);}
+.btn-s{
+  padding:clamp(11px,2vw,15px) clamp(20px,4vw,40px);
+  background:transparent;color:var(--accent);font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(0.8rem,1.9vw,1rem);letter-spacing:4px;
+  border:1px solid rgba(0,210,255,0.4);border-radius:4px;cursor:pointer;
+  transition:background .2s;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.btn-s:hover{background:rgba(0,210,255,0.08);}
+
+/* ticker */
+.ticker-wrap{
+  margin-top:clamp(36px,5vw,56px);width:100%;overflow:hidden;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:9px 0;opacity:0;animation:fadeUp .8s .85s forwards;
+}
+.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:tickerRoll 22s linear infinite;}
+.t-item{display:flex;align-items:center;gap:8px;font-size:clamp(0.56rem,1.3vw,0.68rem);letter-spacing:1.5px;font-family:'Space Mono',monospace;}
+.t-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.t-up{color:var(--green);}.t-dn{color:var(--red);}
+@keyframes tickerRoll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══ STATS ═══ */
+.stats-section{padding:0 clamp(14px,5vw,60px);}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  background:var(--border);gap:1px;
+  opacity:0;animation:fadeUp .8s .95s forwards;
+}
+.stat-box{background:var(--card);padding:clamp(14px,2.6vw,28px) clamp(10px,1.7vw,20px);text-align:center;position:relative;overflow:hidden;}
+.stat-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanBar 3s ease-in-out infinite;animation-delay:var(--sd,0s);}
+@keyframes scanBar{0%,100%{opacity:0;transform:scaleX(0)}50%{opacity:1;transform:scaleX(1)}}
+.stat-lbl{font-size:clamp(0.46rem,1vw,0.58rem);letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,3.8vw,2.7rem);letter-spacing:2px;}
+.sv-a{color:var(--green);text-shadow:var(--glow-g);}
+.sv-b{color:var(--accent);text-shadow:var(--glow-a);}
+.sv-c{color:var(--gold);}
+.stat-note{font-size:clamp(0.46rem,0.95vw,0.58rem);color:var(--muted);margin-top:4px;}
+
+/* ═══ SECTION HEADER ═══ */
+.sec-tag{font-size:clamp(0.5rem,1.3vw,0.63rem);letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.sec-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5.5vw,4rem);line-height:.95;letter-spacing:2px;}
+
+/* ═══ HOW IT WORKS ═══ */
+#how{padding:clamp(65px,9vw,115px) clamp(14px,6vw,80px);}
+.how-inner{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,60px);margin-top:clamp(30px,4.5vw,52px);align-items:start;}
+.steps-list{display:flex;flex-direction:column;}
+.step{
+  display:flex;gap:clamp(12px,1.8vw,20px);
+  padding:clamp(15px,2.2vw,24px) 0;border-bottom:1px solid var(--border);
+  opacity:0;transform:translateX(-20px);transition:opacity .5s,transform .5s;
+}
+.step.vis{opacity:1;transform:translateX(0);}
+.step-n{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,3.8vw,2.9rem);line-height:1;color:rgba(0,210,255,0.13);min-width:40px;flex-shrink:0;transition:color .3s;}
+.step:hover .step-n{color:var(--accent);}
+.step h3{font-size:clamp(0.78rem,1.6vw,0.92rem);font-weight:700;margin-bottom:5px;}
+.step p{font-size:clamp(0.68rem,1.3vw,0.76rem);color:var(--muted);line-height:1.85;}
+.step-pill{display:inline-block;margin-top:8px;font-size:clamp(0.46rem,1vw,0.54rem);letter-spacing:2px;padding:3px 9px;border:1px solid rgba(0,210,255,0.3);color:var(--accent);border-radius:100px;}
+
+/* chart panel */
+.chart-panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:clamp(15px,2.6vw,24px);position:sticky;top:78px;}
+.cp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.cp-pair{font-family:'Bebas Neue',sans-serif;font-size:clamp(0.92rem,2.2vw,1.3rem);letter-spacing:2px;}
+.cp-gain{font-size:clamp(0.56rem,1.3vw,0.7rem);color:var(--green);background:rgba(0,255,179,0.08);padding:4px 10px;border-radius:2px;font-family:'Space Mono',monospace;}
+#tradeChart{width:100%;height:clamp(115px,15vw,185px);display:block;}
+.tlog-title{font-size:clamp(0.46rem,1vw,0.56rem);letter-spacing:3px;color:var(--muted);margin:14px 0 8px;}
+.t-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border);
+  font-size:clamp(0.56rem,1.1vw,0.66rem);font-family:'Space Mono',monospace;
+  gap:6px;flex-wrap:wrap;opacity:0;animation:fadeIn .4s forwards;
+}
+.tag-long{color:var(--green);}.tag-short{color:var(--accent);}.tag-win{color:var(--green);}
+@keyframes fadeIn{to{opacity:1;}}
+
+/* ═══ EXCHANGES ═══ */
+#exchanges{padding:clamp(60px,8vw,100px) clamp(14px,6vw,80px);}
+.exchanges-header{text-align:center;margin-bottom:clamp(30px,4.5vw,52px);}
+.exchanges-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2.5vw,32px);}
+.exchange-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:clamp(24px,3.5vw,40px);text-align:center;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .5s,transform .5s,border-color .3s;
+}
+.exchange-card.vis{opacity:1;transform:translateY(0);}
+.exchange-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.exchange-card.binance-card::before{background:linear-gradient(90deg,#f3ba2f,#f0c040);}
+.exchange-card.dsj-card::before{background:linear-gradient(90deg,var(--accent),var(--green));}
+.exchange-card:hover{border-color:rgba(0,210,255,0.35);}
+.ex-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,5vw,3.2rem);letter-spacing:4px;
+  margin-bottom:10px;
+}
+.ex-logo.binance{color:#f3ba2f;text-shadow:0 0 20px rgba(243,186,47,0.3);}
+.ex-logo.dsj{color:var(--accent);text-shadow:var(--glow-a);}
+.ex-badge{
+  display:inline-block;margin-bottom:16px;
+  font-size:clamp(0.5rem,1.1vw,0.6rem);letter-spacing:2px;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;
+}
+.ex-badge.b-badge{background:rgba(243,186,47,0.12);color:#f3ba2f;border:1px solid rgba(243,186,47,0.25);}
+.ex-badge.d-badge{background:rgba(0,210,255,0.1);color:var(--accent);border:1px solid rgba(0,210,255,0.25);}
+.ex-desc{font-size:clamp(0.72rem,1.5vw,0.82rem);color:var(--muted);line-height:1.85;margin-bottom:22px;}
+.ex-desc strong{color:var(--text);}
+.ex-perks{list-style:none;text-align:left;margin-bottom:24px;display:flex;flex-direction:column;gap:8px;}
+.ex-perks li{
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:clamp(0.68rem,1.3vw,0.76rem);color:var(--muted);
+}
+.ex-perks li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px;}
+.ex-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:clamp(12px,2vw,16px);border-radius:5px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(0.82rem,1.8vw,1rem);letter-spacing:4px;
+  border:none;cursor:pointer;text-decoration:none;
+  transition:transform .2s,box-shadow .2s;
+}
+.ex-btn.b-btn{background:linear-gradient(90deg,#f3ba2f,#f0c040);color:#000;}
+.ex-btn.b-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(243,186,47,0.3);}
+.ex-btn.d-btn{background:linear-gradient(90deg,var(--accent),var(--green));color:#000;}
+.ex-btn.d-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,210,255,0.3);}
+.ex-ref-note{
+  margin-top:12px;font-size:clamp(0.5rem,1vw,0.58rem);
+  color:var(--muted);letter-spacing:1px;text-align:center;
+}
+
+/* ═══ SOCIAL PROOF ═══ */
+#proof{padding:clamp(60px,8vw,100px) clamp(14px,6vw,80px);background:linear-gradient(180deg,transparent,rgba(0,210,255,0.03),transparent);}
+.proof-header{text-align:center;margin-bottom:clamp(26px,4vw,48px);}
+.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.8vw,22px);}
+.proof-card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:clamp(18px,2.7vw,26px);position:relative;overflow:hidden;
+  opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s,border-color .3s;
+}
+.proof-card.vis{opacity:1;transform:translateY(0);}
+.proof-card:hover{border-color:rgba(0,210,255,0.35);}
+.proof-card::before{content:'"';position:absolute;top:-10px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:5.5rem;color:rgba(0,210,255,0.05);line-height:1;pointer-events:none;}
+.proof-stars{color:var(--gold);font-size:clamp(0.62rem,1.3vw,0.72rem);margin-bottom:11px;letter-spacing:2px;}
+.proof-text{font-size:clamp(0.68rem,1.4vw,0.78rem);color:var(--muted);line-height:1.85;margin-bottom:16px;}
+.proof-author{display:flex;align-items:center;gap:9px;}
+.proof-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:#000;flex-shrink:0;}
+.proof-name{font-size:clamp(0.65rem,1.3vw,0.76rem);font-weight:700;}
+.proof-loc{font-size:clamp(0.5rem,1vw,0.58rem);color:var(--muted);}
+
+/* ═══ CALCULATOR ═══ */
+#calculator{padding:clamp(65px,9vw,115px) clamp(14px,6vw,80px);}
+.calc-inner{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(24px,4.5vw,58px);margin-top:clamp(26px,4vw,50px);align-items:start;}
+.calc-form{display:flex;flex-direction:column;gap:clamp(16px,2.6vw,22px);}
+.c-label{font-size:clamp(0.5rem,1.1vw,0.58rem);letter-spacing:3px;color:var(--muted);display:block;margin-bottom:7px;text-transform:uppercase;}
+.c-input-row{display:flex;align-items:stretch;background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color .2s;}
+.c-input-row:focus-within{border-color:var(--accent);}
+.c-input-row input{flex:1;background:transparent;border:none;padding:clamp(9px,1.6vw,13px) clamp(10px,1.7vw,15px);color:var(--text);font-family:'Space Mono',monospace;font-size:clamp(0.82rem,1.8vw,1rem);outline:none;min-width:0;}
+.c-unit{padding:0 clamp(9px,1.7vw,14px);font-size:clamp(0.56rem,1.1vw,0.66rem);color:var(--accent);border-left:1px solid var(--border);background:rgba(0,210,255,0.05);display:flex;align-items:center;white-space:nowrap;}
+.c-range{width:100%;margin-top:7px;accent-color:var(--accent);cursor:pointer;height:4px;}
+.c-range-lbl{display:flex;justify-content:space-between;font-size:clamp(0.46rem,0.95vw,0.54rem);color:var(--muted);margin-top:3px;}
+.calc-go{width:100%;padding:clamp(12px,2vw,15px);background:linear-gradient(90deg,var(--accent),var(--green));color:#000;font-family:'Bebas Neue',sans-serif;font-size:clamp(0.86rem,1.9vw,1.06rem);letter-spacing:4px;border:none;border-radius:4px;cursor:pointer;transition:transform .15s,opacity .2s;}
+.calc-go:hover{transform:translateY(-1px);opacity:.88;}
+.res-panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:clamp(18px,3.2vw,32px);}
+.res-head{font-size:clamp(0.46rem,1vw,0.56rem);letter-spacing:4px;color:var(--muted);margin-bottom:clamp(13px,2.3vw,22px);}
+.res-scenarios{display:flex;flex-direction:column;gap:clamp(10px,1.7vw,15px);}
+.res-card{background:rgba(0,210,255,0.03);border:1px solid var(--border);border-radius:6px;padding:clamp(13px,2.1vw,19px);transition:border-color .3s;}
+.res-card:hover{border-color:var(--accent);}
+.res-card-lbl{font-size:clamp(0.46rem,1vw,0.56rem);letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:clamp(8px,1.4vw,12px);}
+.res-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,1.2vw,12px);}
+.ra{text-align:center;}
+.ra .v{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.1rem,2.7vw,1.7rem);display:block;}
+.ra.ra-a .v{color:var(--green);}.ra.ra-b .v{color:var(--gold);}.ra.ra-c .v{color:var(--accent);}
+.ra .l{font-size:clamp(0.44rem,0.88vw,0.52rem);color:var(--muted);letter-spacing:2px;}
+
+/* ═══ WHY ME ═══ */
+#whyme{padding:clamp(65px,9vw,110px) clamp(14px,6vw,80px);background:linear-gradient(135deg,rgba(0,210,255,0.04) 0%,transparent 60%);}
+.whyme-inner{display:grid;grid-template-columns:auto 1fr;gap:clamp(24px,4vw,54px);align-items:center;}
+.profile-block{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.profile-photo-wrap{
+  width:clamp(88px,12vw,150px);height:clamp(88px,12vw,150px);
+  border-radius:50%;border:3px solid var(--accent);
+  box-shadow:0 0 28px rgba(0,210,255,0.35),0 0 55px rgba(0,210,255,0.1);
+  overflow:hidden;flex-shrink:0;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+}
+.profile-photo-wrap img{width:100%;height:100%;object-fit:cover;}
+.ph-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);text-align:center;padding:8px;}
+.ph-icon{font-size:clamp(1.4rem,2.8vw,2rem);}
+.ph-txt{font-size:clamp(0.44rem,0.88vw,0.54rem);letter-spacing:2px;text-transform:uppercase;}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(0.92rem,1.8vw,1.2rem);letter-spacing:4px;color:var(--accent);text-align:center;}
+.profile-role{font-size:clamp(0.5rem,1vw,0.6rem);letter-spacing:3px;color:var(--muted);text-transform:uppercase;text-align:center;}
+.profile-badge{display:flex;align-items:center;gap:6px;font-size:clamp(0.48rem,0.95vw,0.56rem);letter-spacing:2px;color:var(--green);border:1px solid rgba(0,255,179,0.2);padding:5px 12px;border-radius:100px;white-space:nowrap;}
+.whyme-text h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4.5vw,3.3rem);line-height:.95;letter-spacing:2px;margin-bottom:clamp(12px,2vw,18px);}
+.whyme-text p{font-size:clamp(0.74rem,1.5vw,0.86rem);color:var(--muted);line-height:1.9;margin-bottom:clamp(9px,1.4vw,12px);max-width:540px;}
+.whyme-text strong{color:var(--text);}
+.whyme-perks{display:flex;flex-wrap:wrap;gap:9px;margin-top:clamp(16px,2.6vw,22px);}
+.perk{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:7px 14px;font-size:clamp(0.6rem,1.2vw,0.7rem);transition:border-color .3s;}
+.perk:hover{border-color:var(--accent);}
+
+/* ═══ START STEPS ═══ */
+#start{padding:clamp(65px,9vw,110px) clamp(14px,6vw,80px);}
+.start-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.7vw,20px);margin-top:clamp(26px,4vw,50px);position:relative;}
+.start-steps::before{content:'';position:absolute;top:clamp(23px,3.6vw,34px);left:calc(12.5% + 16px);right:calc(12.5% + 16px);height:1px;background:linear-gradient(90deg,var(--accent),var(--green));opacity:.2;pointer-events:none;}
+.start-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:clamp(17px,2.6vw,26px) clamp(13px,2vw,18px);text-align:center;opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s,border-color .3s;}
+.start-card.vis{opacity:1;transform:translateY(0);}
+.start-card:hover{border-color:rgba(0,210,255,.3);}
+.start-num{width:clamp(32px,4.5vw,48px);height:clamp(32px,4.5vw,48px);border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-family:'Bebas Neue',sans-serif;font-size:clamp(0.9rem,1.8vw,1.2rem);letter-spacing:2px;display:flex;align-items:center;justify-content:center;margin:0 auto clamp(10px,1.7vw,15px);}
+.start-card h3{font-size:clamp(0.76rem,1.6vw,0.9rem);font-weight:700;margin-bottom:7px;}
+.start-card p{font-size:clamp(0.63rem,1.2vw,0.74rem);color:var(--muted);line-height:1.8;}
+
+/* ═══ CALENDLY / MEET ═══ */
+#meet{
+  padding:clamp(65px,9vw,110px) clamp(14px,6vw,80px);
+  background:linear-gradient(180deg,transparent,rgba(0,255,179,0.03),transparent);
+}
+.meet-inner{
+  display:grid;grid-template-columns:1fr 1.4fr;
+  gap:clamp(24px,4vw,56px);margin-top:clamp(26px,4vw,50px);align-items:center;
+}
+.meet-text h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4.5vw,3.3rem);line-height:.95;letter-spacing:2px;margin-bottom:clamp(12px,2vw,18px);}
+.meet-text p{font-size:clamp(0.74rem,1.5vw,0.86rem);color:var(--muted);line-height:1.9;margin-bottom:clamp(9px,1.4vw,12px);}
+.meet-text strong{color:var(--text);}
+.meet-features{display:flex;flex-direction:column;gap:10px;margin-top:clamp(16px,2.5vw,22px);}
+.meet-feat{display:flex;align-items:center;gap:10px;font-size:clamp(0.7rem,1.4vw,0.8rem);color:var(--muted);}
+.meet-feat-icon{width:32px;height:32px;border-radius:6px;background:rgba(0,255,179,0.08);border:1px solid rgba(0,255,179,0.15);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.calendly-frame{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;min-height:clamp(480px,55vw,650px);
+}
+.calendly-frame iframe{width:100%;height:100%;min-height:clamp(480px,55vw,650px);border:none;display:block;}
+
+/* ═══ CTA ═══ */
+#cta{padding:clamp(75px,11vw,125px) clamp(14px,6vw,80px);text-align:center;position:relative;overflow:hidden;}
+#cta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(660px,130vw);height:min(660px,130vw);border-radius:50%;background:radial-gradient(circle,rgba(0,210,255,0.07),transparent 70%);pointer-events:none;}
+.cta-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.7rem,9vw,6.8rem);line-height:.93;letter-spacing:3px;margin-bottom:16px;}
+.cta-h2 span{color:var(--green);}
+.cta-sub{font-size:clamp(0.76rem,1.6vw,0.91rem);color:var(--muted);max-width:440px;margin:0 auto clamp(24px,4vw,40px);line-height:1.9;}
+.cta-btns{display:flex;gap:clamp(9px,1.7vw,14px);justify-content:center;flex-wrap:wrap;}
+.btn-cta-p{padding:clamp(12px,1.9vw,16px) clamp(24px,4vw,48px);background:linear-gradient(90deg,var(--accent),var(--green));color:#000;font-family:'Bebas Neue',sans-serif;font-size:clamp(0.8rem,1.8vw,1rem);letter-spacing:4px;border:none;border-radius:4px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-cta-p:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,210,255,0.35);}
+.btn-cta-s{padding:clamp(12px,1.9vw,16px) clamp(24px,4vw,48px);background:transparent;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:clamp(0.8rem,1.8vw,1rem);letter-spacing:4px;border:1px solid rgba(0,255,179,0.35);border-radius:4px;cursor:pointer;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-cta-s:hover{background:rgba(0,255,179,0.07);}
+
+/* ═══ FOOTER ═══ */
+footer{padding:clamp(20px,3.5vw,36px) clamp(14px,6vw,80px);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+.f-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(0.92rem,2.2vw,1.3rem);letter-spacing:4px;color:var(--accent);}
+.f-disc{font-size:clamp(0.48rem,1vw,0.56rem);color:var(--muted);max-width:520px;line-height:1.7;}
+
+/* ═══ UTILS ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1024px){
+  .how-inner,.calc-inner,.meet-inner{grid-template-columns:1fr;}
+  .chart-panel{position:static;}
+  .exchanges-grid{grid-template-columns:1fr 1fr;}
+  .proof-grid{grid-template-columns:1fr 1fr;}
+  .start-steps{grid-template-columns:1fr 1fr;}
+  .start-steps::before{display:none;}
+  .whyme-inner{grid-template-columns:1fr;}
+  .profile-block{flex-direction:row;flex-wrap:wrap;justify-content:center;}
+}
+@media(max-width:640px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .exchanges-grid{grid-template-columns:1fr;}
+  .proof-grid{grid-template-columns:1fr;}
+  .start-steps{grid-template-columns:1fr;}
+  .res-amounts{grid-template-columns:1fr 1fr;}
+  .hero-btns{flex-direction:column;align-items:center;}
+  .btn-p,.btn-s{width:100%;max-width:280px;}
+  .nav-right .nav-btn{display:none;}
+  .cta-btns{flex-direction:column;align-items:center;}
+  .btn-cta-p,.btn-cta-s{width:100%;max-width:280px;justify-content:center;}
+  .calendly-frame,.calendly-frame iframe{min-height:600px;}
+}
+@media(max-width:400px){
+  .stats-grid{grid-template-columns:1fr;}
+  .res-amounts{grid-template-columns:1fr;}
+}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<!-- ═══ ASIDE: PAGE NAVIGATION ═══ -->
+<aside id="page-nav" aria-label="Navegación de página">
+  <a class="pn-item active" href="#hero" data-section="hero">
+    <span class="pn-label">Inicio</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#how" data-section="how">
+    <span class="pn-label">El Modelo</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#exchanges" data-section="exchanges">
+    <span class="pn-label">Plataformas</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#proof" data-section="proof">
+    <span class="pn-label">Testimonios</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#calculator" data-section="calculator">
+    <span class="pn-label">Simulador</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#whyme" data-section="whyme">
+    <span class="pn-label">Sobre Arturo</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#start" data-section="start">
+    <span class="pn-label">Cómo Empezar</span>
+    <span class="pn-dot"></span>
+  </a>
+  <a class="pn-item" href="#meet" data-section="meet">
+    <span class="pn-label">Agenda Reunión</span>
+    <span class="pn-dot"></span>
+  </a>
+</aside>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-avatar">
+      <img id="navImg" src="yo.jpg" alt="Arturo Rios" onerror="this.style.display='none';document.getElementById('navInit').style.display='flex';">
+      <span class="av-initials" id="navInit" style="display:none;">AR</span>
+    </div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-main">AR CAPITAL</span>
+      <span class="nav-logo-sub">Arturo Rios · Trading</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-live"><div class="live-dot"></div>Operando en vivo</div>
+    <a class="nav-btn" href="#meet">AGENDAR REUNIÓN</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header id="hero">
+  <div class="hero-eyebrow"><span>Sistema activo ·</span> Trading Algorítmico LONG / SHORT · USDT</div>
+  <p class="hero-name">Arturo Rios · AR Capital</p>
+  <h1 class="hero-title">
+    <span class="t-green">1.2%</span><br>
+    DIARIO<br>
+    <span class="t-accent">REAL.</span>
+  </h1>
+  <p class="hero-sub">
+    El algoritmo opera <strong>dos veces al día</strong> usando solo el <strong>1% de tu capital</strong> 
+    por operación. Con <strong>95% de efectividad</strong> comprobada y reinversión automática, 
+    el retorno diario neto es del <strong>1.2% sobre tu saldo</strong> — creciendo día a día con interés compuesto.
+  </p>
+  <div class="hero-btns">
+    <button class="btn-p" onclick="document.getElementById('calculator').scrollIntoView({behavior:'smooth'})">CALCULAR MI GANANCIA</button>
+    <button class="btn-s" onclick="document.getElementById('proof').scrollIntoView({behavior:'smooth'})">VER RESULTADOS REALES</button>
+  </div>
+  <div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
+</header>
+
+<!-- ═══ STATS ═══ -->
+<div class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-box" style="--sd:0s"><div class="stat-lbl">Win Rate</div><div class="stat-val sv-a" id="sw1">0%</div><div class="stat-note">Operaciones ganadoras</div></div>
+    <div class="stat-box" style="--sd:.3s"><div class="stat-lbl">Ganancia / operación</div><div class="stat-val sv-b" id="sw2">0%</div><div class="stat-note">Del capital arriesgado</div></div>
+    <div class="stat-box" style="--sd:.6s"><div class="stat-lbl">Retorno diario neto</div><div class="stat-val sv-c" id="sw3">0%</div><div class="stat-note">Con reinversión compuesta</div></div>
+    <div class="stat-box" style="--sd:.9s"><div class="stat-lbl">Operaciones / día</div><div class="stat-val sv-a">2×</div><div class="stat-note">LONG + SHORT automático</div></div>
+  </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section id="how">
+  <p class="sec-tag">// El modelo</p>
+  <h2 class="sec-h2">Cómo genera<br>dinero tu capital</h2>
+  <div class="how-inner">
+    <div class="steps-list">
+      <div class="step"><div class="step-n">01</div><div><h3>Capital en USDT — base estable</h3><p>El dólar digital USDT no fluctúa como Bitcoin. Tu capital base permanece estable y protegido mientras el algoritmo trabaja por ti.</p><span class="step-pill">CAPITAL ESTABLE</span></div></div>
+      <div class="step"><div class="step-n">02</div><div><h3>Solo el 1% se arriesga por operación</h3><p>El broker usa únicamente el 1% de tu saldo por trade. Con $500 USDT, cada operación arriesga $5. Tu capital principal siempre está protegido.</p><span class="step-pill">RIESGO CONTROLADO</span></div></div>
+      <div class="step"><div class="step-n">03</div><div><h3>2 operaciones diarias · LONG y SHORT</h3><p>El algoritmo detecta la dirección del mercado y abre la posición correcta. Genera ganancia tanto cuando los precios suben como cuando bajan.</p><span class="step-pill">GANA EN CUALQUIER MERCADO</span></div></div>
+      <div class="step"><div class="step-n">04</div><div><h3>1.2% de retorno neto diario</h3><p>Cada operación ganadora genera el 60% del monto arriesgado. Dos operaciones diarias equivalen al 1.2% neto sobre tu saldo total, todos los días.</p><span class="step-pill">1.2% DIARIO NETO</span></div></div>
+      <div class="step"><div class="step-n">05</div><div><h3>Interés compuesto automático</h3><p>Las ganancias se reinvierten automáticamente. Tu capital crece cada día, lo que a su vez incrementa las ganancias del día siguiente. Efecto bola de nieve.</p><span class="step-pill">COMPOUNDING AUTOMÁTICO</span></div></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-head"><span class="cp-pair">BTC / USDT — EN VIVO</span><span class="cp-gain" id="liveGainTxt">+0.00 USDT ↑</span></div>
+      <canvas id="tradeChart"></canvas>
+      <div class="tlog-title">// OPERACIONES RECIENTES</div>
+      <div id="tradeLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EXCHANGES ═══ -->
+<section id="exchanges">
+  <div class="exchanges-header">
+    <p class="sec-tag">// Plataformas necesarias</p>
+    <h2 class="sec-h2">Dos apps para<br>empezar a invertir</h2>
+    <p style="font-size:clamp(0.76rem,1.6vw,0.88rem);color:var(--muted);max-width:520px;margin:14px auto 0;line-height:1.85;">
+      Para operar en este sistema necesitas registrarte en dos plataformas. 
+      Al usar los enlaces de referido obtienes <strong style="color:var(--text)">descuentos en comisiones de trading</strong>.
+    </p>
+  </div>
+  <div class="exchanges-grid">
+
+    <!-- BINANCE -->
+    <div class="exchange-card binance-card">
+      <div class="ex-logo binance">BINANCE</div>
+      <div class="ex-badge b-badge">Exchange principal · Custodia de fondos</div>
+      <p class="ex-desc">
+        El exchange de criptomonedas más grande del mundo. Aquí <strong>custodias tu capital en USDT</strong>
+        con la máxima seguridad, liquidez y herramientas profesionales.
+      </p>
+      <ul class="ex-perks">
+        <li>Descuento en comisiones de trading con el enlace de referido</li>
+        <li>Soporte para retiros en USDT rápido y confiable</li>
+        <li>Aplicación móvil disponible para iOS y Android</li>
+        <li>Más de 150 millones de usuarios en el mundo</li>
+      </ul>
+      <a class="ex-btn b-btn" href="https://www.binance.com/register?ref=JLI3IJCH" target="_blank" rel="noopener">
+        ↗ CREAR CUENTA EN BINANCE
+      </a>
+      <p class="ex-ref-note">Enlace de referido · Descuento en comisiones incluido</p>
+    </div>
+
+    <!-- DSJ / EXSHARE -->
+    <div class="exchange-card dsj-card">
+      <div class="ex-logo dsj">DSJ</div>
+      <div class="ex-badge d-badge">Plataforma de trading · Operaciones algorítmicas</div>
+      <p class="ex-desc">
+        La plataforma donde el algoritmo ejecuta las <strong>operaciones LONG y SHORT</strong>.
+        Aquí el broker opera con tu capital y genera el retorno diario del 1.2%.
+      </p>
+      <ul class="ex-perks">
+        <li>Descuento en comisiones de trading con el enlace de referido</li>
+        <li>Panel de seguimiento de operaciones en tiempo real</li>
+        <li>Historial completo de cada trade ejecutado</li>
+        <li>Reinversión automática de ganancias diarias</li>
+      </ul>
+      <a class="ex-btn d-btn" href="https://exshare.net?code=bmdddpskos00" target="_blank" rel="noopener">
+        ↗ CREAR CUENTA EN DSJ
+      </a>
+      <p class="ex-ref-note">Enlace de referido · Descuento en comisiones incluido</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ SOCIAL PROOF ═══ -->
+<section id="proof">
+  <div class="proof-header">
+    <p class="sec-tag">// Resultados reales</p>
+    <h2 class="sec-h2">Lo que dicen<br>los inversores</h2>
+  </div>
+  <div class="proof-grid">
+    <div class="proof-card">
+      <div class="proof-stars">★★★★★</div>
+      <p class="proof-text">Empecé con $500 USDT y en el primer mes retiré más de $180. El proceso fue exactamente como Arturo explicó. Ahora tengo $2.000 invertidos y con reinversión activa.</p>
+      <div class="proof-author"><div class="proof-av">CR</div><div><div class="proof-name">Claudia R.</div><div class="proof-loc">Bogotá · 8 meses activa</div></div></div>
+    </div>
+    <div class="proof-card">
+      <div class="proof-stars">★★★★★</div>
+      <p class="proof-text">Lo que más me convenció fueron los registros reales de las operaciones. Llevo 6 meses retirando mensualmente sin un solo problema. Totalmente recomendado.</p>
+      <div class="proof-author"><div class="proof-av">SC</div><div><div class="proof-name">Silvia C.</div><div class="proof-loc">Medellín · 6 meses activa</div></div></div>
+    </div>
+    <div class="proof-card">
+      <div class="proof-stars">★★★★★</div>
+      <p class="proof-text">Fui escéptico al principio y le pedí todos los registros antes de invertir. Todo fue transparente. En 12 meses multipliqué mi capital tres veces y no dejo de reinvertir.</p>
+      <div class="proof-author"><div class="proof-av">SA</div><div><div class="proof-name">Salvador A.</div><div class="proof-loc">Cali · 12 meses activo</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CALCULATOR ═══ -->
+<section id="calculator">
+  <p class="sec-tag">// Simulador</p>
+  <h2 class="sec-h2">¿Cuánto puede<br>ganar tu capital?</h2>
+  <div class="calc-inner">
+    <div class="calc-form">
+      <div>
+        <label class="c-label">Capital inicial</label>
+        <div class="c-input-row"><input type="number" id="capI" value="1000" min="100"><span class="c-unit">USDT</span></div>
+        <input type="range" class="c-range" id="capR" min="100" max="20000" value="1000" step="100">
+        <div class="c-range-lbl"><span>$100</span><span>$20.000</span></div>
+      </div>
+      <div>
+        <label class="c-label">Días de reinversión</label>
+        <div class="c-input-row"><input type="number" id="daysI" value="30" min="1" max="365"><span class="c-unit">DÍAS</span></div>
+        <input type="range" class="c-range" id="daysR" min="1" max="365" value="30">
+        <div class="c-range-lbl"><span>1</span><span>365</span></div>
+      </div>
+      <button class="calc-go" onclick="calcResults()">VER PROYECCIÓN →</button>
+    </div>
+    <div class="res-panel">
+      <div class="res-head">// PROYECCIÓN — RETORNO 1.2% DIARIO · COMISIÓN 12% AL RETIRAR</div>
+      <div class="res-scenarios">
+        <div class="res-card">
+          <div class="res-card-lbl">Sin reinversión · Retiro diario neto</div>
+          <div class="res-amounts">
+            <div class="ra ra-a"><span class="v" id="rA1">$0</span><span class="l">GANANCIA/DÍA</span></div>
+            <div class="ra ra-b"><span class="v" id="rA2">$0</span><span class="l">NETO MES</span></div>
+            <div class="ra ra-c"><span class="v" id="rA3">0%</span><span class="l">ROI ANUAL</span></div>
+          </div>
+        </div>
+        <div class="res-card">
+          <div class="res-card-lbl">Compounding diario · Retiro mensual</div>
+          <div class="res-amounts">
+            <div class="ra ra-a"><span class="v" id="rB1">$0</span><span class="l">GANANCIA BRUTA</span></div>
+            <div class="ra ra-b"><span class="v" id="rB2">$0</span><span class="l">NETO RETIRO</span></div>
+            <div class="ra ra-c"><span class="v" id="rB3">0%</span><span class="l">ROI PERÍODO</span></div>
+          </div>
+        </div>
+        <div class="res-card">
+          <div class="res-card-lbl">Reinversión total al período elegido</div>
+          <div class="res-amounts">
+            <div class="ra ra-a"><span class="v" id="rC1">$0</span><span class="l">SALDO FINAL</span></div>
+            <div class="ra ra-b"><span class="v" id="rC2">$0</span><span class="l">GANANCIA NETA</span></div>
+            <div class="ra ra-c"><span class="v" id="rC3">0×</span><span class="l">MULTIPLICADOR</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY ME ═══ -->
+<section id="whyme">
+  <div class="whyme-inner">
+    <div class="profile-block">
+      <div class="profile-photo-wrap">
+        <img src="yo.jpg" alt="Arturo Rios"
+          onerror="this.style.display='none';document.getElementById('phPlaceholder').style.display='flex';">
+        <div class="ph-placeholder" id="phPlaceholder" style="display:none;">
+          <span class="ph-icon">👤</span>
+          <span class="ph-txt">Arturo Rios</span>
+        </div>
+      </div>
+      <div class="profile-name">ARTURO RIOS</div>
+      <div class="profile-role">Trader · Inversor · Bogotá</div>
+      <div class="profile-badge"><span>✓</span>+1 año operando</div>
+    </div>
+    <div class="whyme-text">
+      <p class="sec-tag">// Por qué confiar en mí</p>
+      <h2>Yo invertí primero.<br>Tú decides<br>después.</h2>
+      <p>No te pido que confíes en mi palabra. Te muestro los <strong>registros reales de cada operación</strong>, los comprobantes de retiro mes a mes y el historial completo de la plataforma.</p>
+      <p>Llevo <strong>más de un año</strong> operando en este sistema, retirando ganancias mensualmente sin interrupción. Lo que comparto contigo es exactamente lo que yo mismo uso con mi propio capital.</p>
+      <p>La propuesta es simple: <strong>empieza con lo que puedas comprometer</strong>, verifica dos ciclos de retiro y si los números coinciden, escala según tu criterio. Sin presiones.</p>
+      <div class="whyme-perks">
+        <div class="perk"><span>📊</span>Historial verificable</div>
+        <div class="perk"><span>🔐</span>Capital en USDT</div>
+        <div class="perk"><span>📅</span>Retiros mensuales</div>
+        <div class="perk"><span>📱</span>Seguimiento en tiempo real</div>
+        <div class="perk"><span>🤝</span>Acompañamiento personal</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ START ═══ -->
+<section id="start">
+  <p class="sec-tag">// Empezar es simple</p>
+  <h2 class="sec-h2">4 pasos para<br>tu primera inversión</h2>
+  <div class="start-steps">
+    <div class="start-card"><div class="start-num">1</div><h3>Agenda una reunión</h3><p>Programa 30 minutos conmigo. Te explico el proceso y muestro los registros reales antes de que pongas un solo peso.</p></div>
+    <div class="start-card"><div class="start-num">2</div><h3>Crea tus cuentas</h3><p>Regístrate en Binance y DSJ usando los enlaces de referido para obtener descuentos en comisiones desde el inicio.</p></div>
+    <div class="start-card"><div class="start-num">3</div><h3>El algoritmo trabaja</h3><p>Dos operaciones diarias sin que hagas nada. Puedes seguir el progreso en tiempo real desde tu panel personal.</p></div>
+    <div class="start-card"><div class="start-num">4</div><h3>Retira tus ganancias</h3><p>Cada mes retiras lo que quieras o reinviertes para potenciar el efecto compuesto. Tú decides siempre.</p></div>
+  </div>
+</section>
+
+<!-- ═══ CALENDLY ═══ -->
+<section id="meet">
+  <div class="meet-inner">
+    <div class="meet-text">
+      <p class="sec-tag">// Agenda una reunión</p>
+      <h2>Hablemos<br>30 minutos.</h2>
+      <p>Antes de invertir, te mereces una explicación clara y honesta. Agenda una sesión gratuita de 30 minutos conmigo y resolvemos todas las dudas.</p>
+      <p>Te muestro los <strong>registros reales</strong>, te explico cada paso del proceso y te ayudo a definir el monto inicial que tiene más sentido para ti.</p>
+      <div class="meet-features">
+        <div class="meet-feat"><div class="meet-feat-icon">🗓️</div>Elige la franja horaria que te quede bien</div>
+        <div class="meet-feat"><div class="meet-feat-icon">🎥</div>Reunión por videollamada, desde donde sea</div>
+        <div class="meet-feat"><div class="meet-feat-icon">💯</div>Sin compromisos — tú decides si inviertes</div>
+        <div class="meet-feat"><div class="meet-feat-icon">📲</div>Confirmación inmediata por correo</div>
+      </div>
+    </div>
+    <div class="calendly-frame">
+      <iframe
+        src="https://calendly.com/jeison-rios-c/30min?embed_domain=arcapital.co&embed_type=Inline&hide_gdpr_banner=1&primary_color=00d2ff&text_color=dff0ff&background_color=050d18"
+        frameborder="0"
+        scrolling="yes"
+        title="Agenda una reunión con Arturo Rios">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section id="cta">
+  <h2 class="cta-h2">¿CUÁNDO<br><span>EMPIEZAS?</span></h2>
+  <p class="cta-sub">Cada día que no está en el sistema es un 1.2% que deja de crecer. El capital trabaja 24/7.</p>
+  <div class="cta-btns">
+    <a class="btn-cta-p" href="#meet">AGENDAR REUNIÓN GRATIS</a>
+    <a class="btn-cta-s" href="#calculator">SIMULAR MI INVERSIÓN</a>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">AR CAPITAL</div>
+  <div class="f-disc">Las inversiones en activos digitales conllevan riesgo. Los rendimientos pasados no garantizan resultados futuros. Solo invierte capital que estés dispuesto a comprometer. Arturo Rios no es un asesor financiero regulado.</div>
+</footer>
+
+<script>
+/* ═══ PARTICLES ═══ */
+(()=>{
+  const c=document.getElementById('particles'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  const rs=()=>{W=c.width=innerWidth;H=c.height=innerHeight;};
+  rs();addEventListener('resize',rs);
+  const P=()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,r:Math.random()*1.1+.28,a:Math.random()*.28+.07});
+  for(let i=0;i<85;i++)pts.push(P());
+  const draw=()=>{
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,210,255,${p.a})`;ctx.fill();
+    });
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<88){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(0,210,255,${.05*(1-d/88)})`;ctx.lineWidth=.5;ctx.stroke();}
+    }
+    requestAnimationFrame(draw);
+  };
+  draw();
+})();
+
+/* ═══ TICKER ═══ */
+const tickers=[{p:'BTC/USDT',v:'94,210',c:'+2.14%',u:true},{p:'ETH/USDT',v:'3,415',c:'+1.87%',u:true},{p:'BNB/USDT',v:'604',c:'-0.45%',u:false},{p:'SOL/USDT',v:'182',c:'+3.21%',u:true},{p:'XRP/USDT',v:'0.623',c:'+0.98%',u:true},{p:'ADA/USDT',v:'0.451',c:'-1.10%',u:false},{p:'AVAX/USDT',v:'38.9',c:'+2.55%',u:true},{p:'DOT/USDT',v:'7.82',c:'+1.30%',u:true}];
+const tt=document.getElementById('tickerTrack');
+[...tickers,...tickers].forEach(t=>{const d=document.createElement('div');d.className='t-item';d.innerHTML=`<span class="t-dot"></span><span>${t.p}</span><span>${t.v}</span><span class="${t.u?'t-up':'t-dn'}">${t.c}</span>`;tt.appendChild(d);});
+
+/* ═══ COUNT UP ═══ */
+const cu=(id,end,suf,dec=0)=>{
+  const el=document.getElementById(id);if(!el)return;
+  let s=0;const inc=end/(1800/16);
+  const t=setInterval(()=>{s=Math.min(s+inc,end);el.textContent=(dec?s.toFixed(dec):Math.floor(s))+suf;if(s>=end)clearInterval(t);},16);
+};
+setTimeout(()=>{cu('sw1',95,'%');cu('sw2',60,'%');cu('sw3',1.2,'%',1);},500);
+
+/* ═══ CHART ═══ */
+(()=>{
+  const cv=document.getElementById('tradeChart'),ctx=cv.getContext('2d');
+  const rs=()=>{cv.width=cv.offsetWidth||300;cv.height=cv.offsetWidth<400?115:180;};
+  rs();addEventListener('resize',()=>{rs();draw();});
+  let data=[];for(let i=0;i<50;i++)data.push(1000+Math.random()*20-10+(i*12/50));
+  const draw=()=>{
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const mn=Math.min(...data)-7,mx=Math.max(...data)+7;
+    const sc=v=>cv.height-((v-mn)/(mx-mn))*cv.height*.82-cv.height*.09;
+    const xs=cv.width/(data.length-1);
+    const g=ctx.createLinearGradient(0,0,0,cv.height);
+    g.addColorStop(0,'rgba(0,210,255,0.16)');g.addColorStop(1,'rgba(0,210,255,0)');
+    ctx.beginPath();ctx.moveTo(0,cv.height);
+    data.forEach((v,i)=>ctx.lineTo(i*xs,sc(v)));
+    ctx.lineTo(cv.width,cv.height);ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();
+    data.forEach((v,i)=>i===0?ctx.moveTo(0,sc(v)):ctx.lineTo(i*xs,sc(v)));
+    ctx.strokeStyle='rgba(0,210,255,0.8)';ctx.lineWidth=2;ctx.stroke();
+    const lx=(data.length-1)*xs,ly=sc(data[data.length-1]);
+    ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);ctx.fillStyle='#00d2ff';ctx.fill();
+  };
+  draw();
+  setInterval(()=>{data.push(data[data.length-1]+(Math.random()*3-1));if(data.length>65)data.shift();draw();},900);
+})();
+
+/* ═══ TRADE LOG ═══ */
+const pairs=['BTC/USDT','ETH/USDT','SOL/USDT','BNB/USDT'];
+const logC=document.getElementById('tradeLog');let tc=0;
+const addTrade=()=>{
+  if(tc>4&&logC.firstChild)logC.removeChild(logC.firstChild);
+  const isL=Math.random()>.25,pair=pairs[Math.floor(Math.random()*pairs.length)],gain=(5+Math.random()*4).toFixed(2);
+  const r=document.createElement('div');r.className='t-row';
+  r.innerHTML=`<span class="${isL?'tag-long':'tag-short'}">${isL?'▲ LONG':'▼ SHORT'}</span><span>${pair}</span><span style="color:var(--muted)">${new Date().toLocaleTimeString('es-CO')}</span><span class="tag-win">+${gain} USDT</span>`;
+  logC.appendChild(r);tc++;
+  document.getElementById('liveGainTxt').textContent=`+${gain} USDT ↑`;
+};
+addTrade();addTrade();addTrade();setInterval(addTrade,4200);
+
+/* ═══ CALCULATOR ═══ */
+const capI=document.getElementById('capI'),capR=document.getElementById('capR');
+const daysI=document.getElementById('daysI'),daysR=document.getElementById('daysR');
+capI.oninput=()=>{capR.value=capI.value;calcResults();};
+capR.oninput=()=>{capI.value=capR.value;calcResults();};
+daysI.oninput=()=>{daysR.value=daysI.value;calcResults();};
+daysR.oninput=()=>{daysI.value=daysR.value;calcResults();};
+const fmt=n=>n>=1000?'$'+n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,','):'$'+n.toFixed(2);
+function calcResults(){
+  const cap=parseFloat(capI.value)||1000,days=parseInt(daysI.value)||30,dr=0.012,fee=0.12;
+  const dn=cap*dr*(1-fee);
+  document.getElementById('rA1').textContent=fmt(dn);
+  document.getElementById('rA2').textContent=fmt(dn*30);
+  document.getElementById('rA3').textContent=((dn*365/cap)*100).toFixed(0)+'%';
+  const fB=cap*Math.pow(1+dr,days),gB=fB-cap,nB=gB*(1-fee);
+  document.getElementById('rB1').textContent=fmt(gB);
+  document.getElementById('rB2').textContent=fmt(nB);
+  document.getElementById('rB3').textContent='+'+((nB/cap)*100).toFixed(1)+'%';
+  const fC=cap*Math.pow(1+dr,days),nC=(fC-cap)*(1-fee);
+  document.getElementById('rC1').textContent=fmt(fC);
+  document.getElementById('rC2').textContent=fmt(nC);
+  document.getElementById('rC3').textContent=(fC/cap).toFixed(2)+'×';
+}
+calcResults();
+
+/* ═══ SCROLL REVEAL ═══ */
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.step,.proof-card,.start-card,.exchange-card').forEach((el,i)=>{
+        el.style.transitionDelay=`${i*.12}s`;el.classList.add('vis');
+      });
+      e.target.classList.add('vis');
+    }
+  });
+},{threshold:.07});
+document.querySelectorAll('#how,#proof,#start,#exchanges,.step,.proof-card,.start-card,.exchange-card').forEach(el=>ro.observe(el));
+
+/* ═══ PAGE NAV (ASIDE) ═══ */
+(()=>{
+  const sections=['hero','how','exchanges','proof','calculator','whyme','start','meet'];
+  const items=document.querySelectorAll('.pn-item');
+
+  // Click smooth scroll
+  items.forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      const id=item.getAttribute('href').replace('#','');
+      const el=document.getElementById(id);
+      if(el)el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  // Intersection observer per section
+  const setActive=(id)=>{
+    items.forEach(item=>{
+      const active=item.dataset.section===id;
+      item.classList.toggle('active',active);
+    });
+  };
+
+  const secObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting)setActive(e.target.id);
+    });
+  },{rootMargin:'-40% 0px -40% 0px',threshold:0});
+
+  sections.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)secObs.observe(el);
+  });
+})();
+</script>
+</body>
+</html>
