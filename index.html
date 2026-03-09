@@ -511,7 +511,7 @@ footer{padding:clamp(20px,3.5vw,36px) clamp(14px,6vw,80px);border-top:1px solid 
       <div class="step"><div class="step-n">05</div><div><h3>Interés compuesto automático</h3><p>Las ganancias se reinvierten automáticamente. Tu capital crece cada día, lo que a su vez incrementa las ganancias del día siguiente. Efecto bola de nieve.</p><span class="step-pill">COMPOUNDING AUTOMÁTICO</span></div></div>
     </div>
     <div class="chart-panel">
-      <div class="cp-head"><span class="cp-pair">BTC / USDT — EN VIVO</span><span class="cp-gain" id="liveGainTxt">+0.00 USDT ↑</span></div>
+      <div class="cp-head"><span class="cp-pair">BTC/USDT — EN VIVO</span><span class="cp-gain" id="liveGainTxt" title="Variación 24h">Conectando…</span></div>
       <canvas id="tradeChart"></canvas>
       <div class="tlog-title">// OPERACIONES RECIENTES</div>
       <div id="tradeLog"></div>
@@ -763,11 +763,6 @@ footer{padding:clamp(20px,3.5vw,36px) clamp(14px,6vw,80px);border-top:1px solid 
   draw();
 })();
 
-/* ═══ TICKER ═══ */
-const tickers=[{p:'BTC/USDT',v:'94,210',c:'+2.14%',u:true},{p:'ETH/USDT',v:'3,415',c:'+1.87%',u:true},{p:'BNB/USDT',v:'604',c:'-0.45%',u:false},{p:'SOL/USDT',v:'182',c:'+3.21%',u:true},{p:'XRP/USDT',v:'0.623',c:'+0.98%',u:true},{p:'ADA/USDT',v:'0.451',c:'-1.10%',u:false},{p:'AVAX/USDT',v:'38.9',c:'+2.55%',u:true},{p:'DOT/USDT',v:'7.82',c:'+1.30%',u:true}];
-const tt=document.getElementById('tickerTrack');
-[...tickers,...tickers].forEach(t=>{const d=document.createElement('div');d.className='t-item';d.innerHTML=`<span class="t-dot"></span><span>${t.p}</span><span>${t.v}</span><span class="${t.u?'t-up':'t-dn'}">${t.c}</span>`;tt.appendChild(d);});
-
 /* ═══ COUNT UP ═══ */
 const cu=(id,end,suf,dec=0)=>{
   const el=document.getElementById(id);if(!el)return;
@@ -776,44 +771,247 @@ const cu=(id,end,suf,dec=0)=>{
 };
 setTimeout(()=>{cu('sw1',95,'%');cu('sw2',60,'%');cu('sw3',1.2,'%',1);},500);
 
-/* ═══ CHART ═══ */
+/* ═══ BINANCE REAL-TIME DATA ═══ */
 (()=>{
-  const cv=document.getElementById('tradeChart'),ctx=cv.getContext('2d');
-  const rs=()=>{cv.width=cv.offsetWidth||300;cv.height=cv.offsetWidth<400?115:180;};
-  rs();addEventListener('resize',()=>{rs();draw();});
-  let data=[];for(let i=0;i<50;i++)data.push(1000+Math.random()*20-10+(i*12/50));
-  const draw=()=>{
-    ctx.clearRect(0,0,cv.width,cv.height);
-    const mn=Math.min(...data)-7,mx=Math.max(...data)+7;
-    const sc=v=>cv.height-((v-mn)/(mx-mn))*cv.height*.82-cv.height*.09;
-    const xs=cv.width/(data.length-1);
-    const g=ctx.createLinearGradient(0,0,0,cv.height);
-    g.addColorStop(0,'rgba(0,210,255,0.16)');g.addColorStop(1,'rgba(0,210,255,0)');
-    ctx.beginPath();ctx.moveTo(0,cv.height);
-    data.forEach((v,i)=>ctx.lineTo(i*xs,sc(v)));
-    ctx.lineTo(cv.width,cv.height);ctx.fillStyle=g;ctx.fill();
-    ctx.beginPath();
-    data.forEach((v,i)=>i===0?ctx.moveTo(0,sc(v)):ctx.lineTo(i*xs,sc(v)));
-    ctx.strokeStyle='rgba(0,210,255,0.8)';ctx.lineWidth=2;ctx.stroke();
-    const lx=(data.length-1)*xs,ly=sc(data[data.length-1]);
-    ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);ctx.fillStyle='#00d2ff';ctx.fill();
+  // ── Symbols config ──
+  const SYMBOLS = [
+    {sym:'BTCUSDT', label:'BTC/USDT', dec:2},
+    {sym:'ETHUSDT', label:'ETH/USDT', dec:2},
+    {sym:'BNBUSDT', label:'BNB/USDT', dec:2},
+    {sym:'SOLUSDT', label:'SOL/USDT', dec:2},
+    {sym:'XRPUSDT', label:'XRP/USDT', dec:4},
+    {sym:'ADAUSDT', label:'ADA/USDT', dec:4},
+    {sym:'AVAXUSDT',label:'AVAX/USDT',dec:2},
+    {sym:'DOTUSDT', label:'DOT/USDT', dec:3},
+  ];
+
+  // Price state
+  const priceState = {};
+  SYMBOLS.forEach(s => priceState[s.sym] = {price:null, chgPct:null, dec:s.dec, label:s.label});
+
+  // ── Format helpers ──
+  const fmtPrice = (p, dec) => {
+    const n = parseFloat(p);
+    if(n >= 10000) return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    if(n >= 1000)  return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return n.toFixed(dec);
   };
-  draw();
-  setInterval(()=>{data.push(data[data.length-1]+(Math.random()*3-1));if(data.length>65)data.shift();draw();},900);
+  const fmtChg = pct => {
+    const n = parseFloat(pct);
+    return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+  };
+
+  // ── BUILD TICKER DOM ──
+  const tt = document.getElementById('tickerTrack');
+  const tickerEls = {}; // sym → {price, chg}
+
+  const buildTicker = () => {
+    tt.innerHTML = '';
+    // duplicate for seamless loop
+    [SYMBOLS, SYMBOLS].flat().forEach((s, idx) => {
+      const div = document.createElement('div');
+      div.className = 't-item';
+      const key = s.sym + '_' + (idx >= SYMBOLS.length ? '2' : '1');
+      div.innerHTML = `<span class="t-dot"></span>
+        <span>${s.label}</span>
+        <span class="t-price-${s.sym}" style="font-family:'Space Mono',monospace">—</span>
+        <span class="t-chg-${s.sym} t-up">—</span>`;
+      tt.appendChild(div);
+    });
+  };
+  buildTicker();
+
+  const updateTickerDOM = (sym) => {
+    const st = priceState[sym];
+    if(!st.price) return;
+    const priceStr = fmtPrice(st.price, st.dec);
+    const chgStr   = fmtChg(st.chgPct);
+    const isUp     = parseFloat(st.chgPct) >= 0;
+    document.querySelectorAll(`.t-price-${sym}`).forEach(el => el.textContent = priceStr);
+    document.querySelectorAll(`.t-chg-${sym}`).forEach(el => {
+      el.textContent = chgStr;
+      el.className = isUp ? 't-up' : 't-dn';
+    });
+  };
+
+  // ── BTC REAL-TIME CHART ──
+  const cv  = document.getElementById('tradeChart');
+  const ctx = cv.getContext('2d');
+  let chartData = []; // array of close prices (1m candles)
+  let wsReady = false;
+
+  const resizeChart = () => {
+    cv.width  = cv.offsetWidth || 300;
+    cv.height = cv.offsetWidth < 400 ? 115 : 180;
+  };
+  resizeChart();
+  addEventListener('resize', () => { resizeChart(); drawChart(); });
+
+  const drawChart = () => {
+    if(chartData.length < 2) return;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const mn = Math.min(...chartData);
+    const mx = Math.max(...chartData);
+    const range = mx - mn || 1;
+    const pad = range * 0.1;
+    const sc = v => cv.height - ((v - mn + pad) / (range + pad * 2)) * cv.height * 0.9 - cv.height * 0.05;
+    const xs = cv.width / (chartData.length - 1);
+
+    // gradient fill
+    const g = ctx.createLinearGradient(0, 0, 0, cv.height);
+    g.addColorStop(0, 'rgba(0,210,255,0.18)');
+    g.addColorStop(1, 'rgba(0,210,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(0, cv.height);
+    chartData.forEach((v,i) => ctx.lineTo(i * xs, sc(v)));
+    ctx.lineTo(cv.width, cv.height);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // line
+    ctx.beginPath();
+    chartData.forEach((v,i) => i === 0 ? ctx.moveTo(0, sc(v)) : ctx.lineTo(i * xs, sc(v)));
+    ctx.strokeStyle = 'rgba(0,210,255,0.85)';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    // live dot
+    const lx = (chartData.length - 1) * xs;
+    const ly = sc(chartData[chartData.length - 1]);
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#00d2ff'; ctx.fill();
+    // pulse ring
+    ctx.beginPath(); ctx.arc(lx, ly, 7, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,210,255,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+  };
+
+  // ── FETCH INITIAL BTC KLINES (REST) ──
+  const loadKlines = async () => {
+    try {
+      const url = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60';
+      const res  = await fetch(url);
+      const data = await res.json();
+      chartData  = data.map(k => parseFloat(k[4])); // close price
+      drawChart();
+      // Update chart header with last price
+      if(chartData.length){
+        const last = chartData[chartData.length - 1];
+        document.querySelector('.cp-pair').textContent = `BTC/USDT ≈ $${last.toLocaleString('en-US',{maximumFractionDigits:0})}`;
+      }
+    } catch(e){ console.warn('Klines fetch failed',e); }
+  };
+  loadKlines();
+
+  // ── FETCH INITIAL 24HR TICKER (REST) ──
+  const loadTicker24h = async () => {
+    try {
+      const syms = SYMBOLS.map(s=>`"${s.sym}"`).join(',');
+      const url  = `https://api.binance.com/api/v3/ticker/24hr?symbols=[${syms}]`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      data.forEach(t => {
+        if(priceState[t.symbol]){
+          priceState[t.symbol].price  = t.lastPrice;
+          priceState[t.symbol].chgPct = t.priceChangePercent;
+          updateTickerDOM(t.symbol);
+        }
+      });
+    } catch(e){ console.warn('Ticker24h fetch failed',e); }
+  };
+  loadTicker24h();
+
+  // ── WEBSOCKET COMBINED STREAM ──
+  // Streams: BTC kline_1m for chart + miniTicker for all symbols
+  const streams = [
+    'btcusdt@kline_1m',
+    ...SYMBOLS.map(s => s.sym.toLowerCase() + '@miniTicker')
+  ].join('/');
+
+  const connectWS = () => {
+    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+    ws.onopen = () => { wsReady = true; };
+
+    ws.onmessage = (e) => {
+      try {
+        const msg  = JSON.parse(e.data);
+        const data = msg.data;
+        const sn   = data.s; // symbol e.g. BTCUSDT
+
+        // BTC kline update → update chart
+        if(data.e === 'kline') {
+          const k = data.k;
+          const closePrice = parseFloat(k.c);
+          if(k.x) {
+            // Candle closed → push new point
+            chartData.push(closePrice);
+            if(chartData.length > 80) chartData.shift();
+          } else {
+            // Update last point with current close
+            if(chartData.length) chartData[chartData.length - 1] = closePrice;
+          }
+          drawChart();
+          document.querySelector('.cp-pair').textContent =
+            `BTC/USDT ≈ $${closePrice.toLocaleString('en-US',{maximumFractionDigits:0})}`;
+          // Live gain badge shows BTC 24h change
+          if(priceState['BTCUSDT'].chgPct !== null){
+            const chg = parseFloat(priceState['BTCUSDT'].chgPct);
+            document.getElementById('liveGainTxt').textContent =
+              `BTC ${chg >= 0 ? '↑' : '↓'} ${Math.abs(chg).toFixed(2)}% 24h`;
+          }
+          return;
+        }
+
+        // miniTicker → update ticker strip
+        if(data.e === '24hrMiniTicker' && priceState[sn]) {
+          // chgPct from miniTicker = ((close - open) / open) * 100
+          const chgPct = ((parseFloat(data.c) - parseFloat(data.o)) / parseFloat(data.o)) * 100;
+          priceState[sn].price  = data.c;
+          priceState[sn].chgPct = chgPct.toFixed(2);
+          updateTickerDOM(sn);
+        }
+      } catch(_){}
+    };
+
+    ws.onclose = () => {
+      wsReady = false;
+      // Reconnect after 3s
+      setTimeout(connectWS, 3000);
+    };
+
+    ws.onerror = () => ws.close();
+  };
+  connectWS();
+
+  // ── STATUS INDICATOR: update nav "live" text on WS state ──
+  const liveLabel = document.querySelector('.nav-live');
+  setInterval(() => {
+    if(wsReady){
+      liveLabel.style.color = 'var(--green)';
+    } else {
+      liveLabel.style.color = 'var(--muted)';
+    }
+  }, 2000);
+
 })();
 
-/* ═══ TRADE LOG ═══ */
-const pairs=['BTC/USDT','ETH/USDT','SOL/USDT','BNB/USDT'];
+/* ═══ TRADE LOG (simulated ops, contexto de par real) ═══ */
+const tradePairs=['BTC/USDT','ETH/USDT','SOL/USDT','BNB/USDT'];
 const logC=document.getElementById('tradeLog');let tc=0;
 const addTrade=()=>{
   if(tc>4&&logC.firstChild)logC.removeChild(logC.firstChild);
-  const isL=Math.random()>.25,pair=pairs[Math.floor(Math.random()*pairs.length)],gain=(5+Math.random()*4).toFixed(2);
+  const isL=Math.random()>.28;
+  const pair=tradePairs[Math.floor(Math.random()*tradePairs.length)];
+  const gain=(5.2+Math.random()*4.6).toFixed(2);
   const r=document.createElement('div');r.className='t-row';
-  r.innerHTML=`<span class="${isL?'tag-long':'tag-short'}">${isL?'▲ LONG':'▼ SHORT'}</span><span>${pair}</span><span style="color:var(--muted)">${new Date().toLocaleTimeString('es-CO')}</span><span class="tag-win">+${gain} USDT</span>`;
+  r.innerHTML=`<span class="${isL?'tag-long':'tag-short'}">${isL?'▲ LONG':'▼ SHORT'}</span>`+
+    `<span>${pair}</span>`+
+    `<span style="color:var(--muted)">${new Date().toLocaleTimeString('es-CO')}</span>`+
+    `<span class="tag-win">+${gain} USDT</span>`;
   logC.appendChild(r);tc++;
-  document.getElementById('liveGainTxt').textContent=`+${gain} USDT ↑`;
 };
-addTrade();addTrade();addTrade();setInterval(addTrade,4200);
+addTrade();addTrade();addTrade();setInterval(addTrade,4500);
 
 /* ═══ CALCULATOR ═══ */
 const capI=document.getElementById('capI'),capR=document.getElementById('capR');
